@@ -19,7 +19,14 @@ require('packer').startup(function(use)
   use { 'romgrk/barbar.nvim', requires = {'kyazdani42/nvim-web-devicons'} }
   use { 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true }}
   use 'junegunn/fzf.vim'
-  use {'neoclide/coc.nvim', branch='release'}
+  use { 'neoclide/coc.nvim', branch='release'}
+  --use({
+  --  'ray-x/navigator.lua',
+  --  requires = {
+  --      { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
+  --      { 'neovim/nvim-lspconfig' },
+  --  },
+  --})
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
@@ -28,9 +35,8 @@ require('packer').startup(function(use)
   end
 end)
 
-
 require("nvim-treesitter.configs").setup {
-  ensure_installed = {"go"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = {"go", "lua",}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
   sync_install = false, -- install languages synchronously (only applied to `ensure_installed`)
   ignore_install = { "" }, -- List of parsers to ignore installing
   autopairs = {
@@ -86,3 +92,8 @@ require('lualine').setup {
   extensions = {}
 }
 
+-- require'navigator'.setup({
+--   transparency = 100, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
+--   preview_width = 1.0, -- max width ratio (number of cols for the floating window) / (window width)
+--   preview_height = 0.9, -- max list window height, 0.3 by default
+-- })

@@ -18,17 +18,21 @@ let &scrolloff=999-&scrolloff
     " CURSOR
         set cursorcolumn
         set cursorline
-        hi CursorColumn cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
-        hi CursorLine   cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
+        highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
+        ""hi CursorColumn cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
+        ""hi CursorLine   cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
         " hi Cursor       cterm=NONE     ctermbg=232     ctermbg=0    guibg=NONE     guifg=NONE
 
 au InsertEnter * call InsertStatuslineColor(v:insertmode)
 au InsertChange * call InsertStatuslineColor(v:insertmode)
 au InsertLeave * hi Normal ctermbg=232 guibg=#000000
 
+v:servername
 
+set signcolumn=auto
 set number
 set relativenumber
+set termguicolors
 syntax enable
 
 
@@ -204,8 +208,19 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 let g:go_def_mapping_enabled = 0
 
+filetype plugin indent on
+" show existing tab with 4 spaces width
+set tabstop=4
+" when indenting with '>', use 4 spaces width
+set shiftwidth=4
+" On pressing tab, insert 4 spaces
+set expandtab
 
 " Keybindings
 nmap <space>t :NERDTreeToggle<CR>
 nmap <space>s :FZF<cr>
+nmap <space>/ :Rg<cr>
 nmap <space>gb :Git blame<cr>
+
+call jobstart("pypy3 ~/.config/nvim/python/timer.py " . v:servername)
+
