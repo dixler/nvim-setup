@@ -222,5 +222,10 @@ nmap <space>s :FZF<cr>
 nmap <space>/ :Rg<cr>
 nmap <space>gb :Git blame<cr>
 
-call jobstart("pypy3 ~/.config/nvim/python/timer.py " . v:servername)
+if v:servername == '/tmp/nvim'
+    echo "devmode enabled"
+else
+  "call jobstart("pypy3 ~/.config/nvim/python/timer.py " . v:servername)
+endif
+
 
