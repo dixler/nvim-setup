@@ -97,3 +97,4 @@ require('lualine').setup {
 --   preview_width = 1.0, -- max width ratio (number of cols for the floating window) / (window width)
 --   preview_height = 0.9, -- max list window height, 0.3 by default
 -- })
+vim.wo.signcolumn = "yes"

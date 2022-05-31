@@ -27,12 +27,10 @@ au InsertEnter * call InsertStatuslineColor(v:insertmode)
 au InsertChange * call InsertStatuslineColor(v:insertmode)
 au InsertLeave * hi Normal ctermbg=232 guibg=#000000
 
-v:servername
-
-set signcolumn=auto
 set number
 set relativenumber
 set termguicolors
+set signcolumn=yes:1
 syntax enable
 
 
