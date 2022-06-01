@@ -215,15 +215,12 @@ set shiftwidth=4
 set expandtab
 
 " Keybindings
-nmap <space>t :NERDTreeToggle<CR>
-nmap <space>s :FZF<cr>
-nmap <space>/ :Rg<cr>
-nmap <space>gb :Git blame<cr>
+let mapleader = " "
+nnoremap <leader>t :NERDTreeToggle<CR>
+nnoremap <leader>s :FZF<cr>
+nnoremap <leader>/ :Rg<cr>
+nnoremap <leader>gb :Git blame<cr>
+nnoremap <leader>ve :vsplit $MYVIMRC<cr>
+nnoremap <leader>vs :source $MYVIMRC<cr>
 
-if v:servername == '/tmp/nvim'
-    echo "devmode enabled"
-else
-  "call jobstart("pypy3 ~/.config/nvim/python/timer.py " . v:servername)
-endif
-
-
+autocmd VimEnter * UpdateRemotePlugins

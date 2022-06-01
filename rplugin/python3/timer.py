@@ -39,7 +39,9 @@ class BlameLine:
 
 def get_buffer_blame(nvim, bnr, memo={}) -> List[BlameLine]:
     text = '\n'.join(bnr[:])
-    if text not in memo:
+    if bnr.name not in memo:
+        memo[bnr.name] = {}
+    if text not in memo.get(bnr.name):
         fullpath = nvim.funcs.expand('%:p')
         d = os.path.dirname(fullpath)
         filename = os.path.basename(fullpath)
@@ -62,7 +64,7 @@ class TestPlugin(object):
     def __init__(self, nvim):
         self.nvim = nvim
         self.ns_id = nvim.api.create_namespace('demo')
-        self.blame_lines = None
+        self.blame_lines = {}
         self.marks = {}
 
     @pynvim.command("Glame", nargs="*", range="", sync=False)
@@ -78,16 +80,13 @@ class TestPlugin(object):
         self.update()
 
     def update(self):
-        #asyncio.ensure_future(self.update_async())
-
-    #async def update_async(self):
         bnr = self.nvim.current.buffer
         new_blame_lines = get_buffer_blame(self.nvim, bnr)
-        if new_blame_lines == self.blame_lines:
+        if new_blame_lines == self.blame_lines.get(bnr.name):
             return
-        self.blame_lines = new_blame_lines
+        self.blame_lines[bnr.name] = new_blame_lines
 
-        for blame in self.blame_lines:
+        for blame in self.blame_lines[bnr.name]:
             hl_id = f"DiffGutter_{blame.commit}"
             self.nvim.command(f"highlight {hl_id} guibg=#{blame.commit[:6]}")
             sign_id = f"DiffGutterSign_{blame.commit}"
