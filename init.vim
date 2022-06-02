@@ -224,3 +224,6 @@ nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 nnoremap <leader>vs :source $MYVIMRC<cr>
 
 autocmd VimEnter * UpdateRemotePlugins
+
+autocmd! FileType list wincmd H
+autocmd! FileType help wincmd H

@@ -4,11 +4,10 @@ from datetime import datetime
 import tempfile
 from typing import List
 import pynvim
-import asyncio
 
 
 class BlameLine:
-    def __init__(self, commit=None, email=None, timestamp=None, lineno=None, line=None, git_text=None):
+    def __init__(self, commit=None, email=None, timestamp=None, lineno=None, line=None):
         self.commit = commit
         self.email = email
         self.timestamp = timestamp
