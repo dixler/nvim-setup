@@ -18,8 +18,9 @@ class BlameLine:
         return f'|{self.commit}|{self.email}|{self.timestamp}|{self.lineno}|{self.line}|'
     @staticmethod
     def from_line(line):
-        s = line.split('(', maxsplit=1)
+        s = line.split(' ', maxsplit=1)
         commit = s[0].strip()
+        s = s[1].split('(', maxsplit=1)
         s = s[1].split('>', maxsplit=1)
         email = s[0][1:].strip()
         date_format = "%Y-%m-%d %H:%M:%S %z"
