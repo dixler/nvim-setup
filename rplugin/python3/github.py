@@ -15,20 +15,11 @@ def get_git_permalink(fullpath: str, nvim=None) -> str:
     with os.popen(f"git -C '{d}' rev-parse HEAD") as p:
         commit = p.read().strip()
 
-        # TODO get file path using fullpath
-        path = os.path.basename(fullpath)
-        dirs = d.split(os.path.sep)
-        while dirs:
-            try:
-                git_root_candidate = str(os.path.join(*dirs, '.git'))
-                os.stat(git_root_candidate)
-
-                permalink = f"{base_url}/tree/{commit}/{path}"
-                return permalink
-            except FileNotFoundError:
-                path = os.path.join(dirs.pop(), path)
-                dirs.pop()
-    raise FileNotFoundError("unable to find .git")
+    with os.popen(f"git -C '{d}' rev-parse --show-toplevel") as p:
+        root_path = p.read().strip() + '/'
+        path = fullpath[len(root_path):]
+    permalink = f"{base_url}/tree/{commit}/{path}"
+    return permalink
 
             
 @pynvim.plugin
