@@ -3,7 +3,7 @@ import os
 import pynvim
 
 
-def get_git_permalink(fullpath: str, nvim=None) -> str:
+def get_git_permalink(fullpath: str, lines=None) -> str:
     d = os.path.dirname(fullpath)
 
     with os.popen(f"git -C '{d}' remote get-url origin") as p:
@@ -19,7 +19,13 @@ def get_git_permalink(fullpath: str, nvim=None) -> str:
         root_path = p.read().strip() + '/'
         path = fullpath[len(root_path):]
     permalink = f"{base_url}/tree/{commit}/{path}"
-    return permalink
+
+    if not lines:
+        return permalink
+
+    if lines[0] == lines[1]:
+        return f"{permalink}#L{lines[0]}"
+    return f"{permalink}#L{lines[0]}-L{lines[1]}"
 
             
 @pynvim.plugin
@@ -29,6 +35,11 @@ class TestPlugin(object):
         self.nvim = nvim
 
     @pynvim.command("Permalink", nargs="*", range="", sync=False)
-    def testfunction(self, *args, **kwargs):
+    def permalink(self, *args, **kwargs):
         fullpath = self.nvim.funcs.expand('%:p')
-        self.nvim.command(f'echom "{get_git_permalink(fullpath)}"')
+        bnr = self.nvim.current.buffer
+        start = self.nvim.api.buf_get_mark(bnr, "<")
+        end = self.nvim.api.buf_get_mark(bnr, ">")
+        permalink = get_git_permalink(fullpath, lines=[start[0], end[0]])
+        self.nvim.feedkeys(f'gv')
+        self.nvim.command(f'echom "{permalink}"')
