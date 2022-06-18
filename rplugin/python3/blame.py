@@ -92,7 +92,7 @@ class TestPlugin(object):
             sign_id = f"DiffGutterSign_{blame.commit}"
             sign_text = blame.email.split('@')[0][:2]
             self.nvim.command(f"sign define {sign_id} texthl={hl_id} numhl={hl_id} text={sign_text}")
-            lineno = blame.lineno
-            if lineno in self.marks:
-                self.nvim.command(f'sign unplace {lineno}')
-            self.marks[lineno] = self.nvim.command(f'sign place {lineno} line={lineno} name={sign_id}') or True
+            signref = f'614{blame.lineno}'
+            if signref in self.marks:
+                self.nvim.command(f'sign unplace {signref}')
+            self.marks[signref] = self.nvim.command(f'sign place {signref} line={blame.lineno} name={sign_id}') or True
