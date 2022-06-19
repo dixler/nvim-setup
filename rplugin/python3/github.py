@@ -126,23 +126,45 @@ def get_git_permalink(fullpath: str, start=None, end=None) -> str:
 class HLManager:
     def __init__(self, nvim):
         self.nvim = nvim
+        self.ns_id = nvim.api.create_namespace('gossip')
         self.marks = {}
+        self.extmarks = {}
+        self.hl_id = f"CommentSign"
+        self.nvim.command(f"highlight {self.hl_id} guibg=#333333")
     def mark_lines(self, start, end):
         bnr = self.nvim.current.buffer
         if bnr not in self.marks:
             self.marks[bnr] = {}
-        
         for lineno in range(start, end+1):
-            hl_id = f"CommentSign_{lineno}"
-            self.nvim.command(f"highlight {hl_id} guibg=grey")
             sign_id = f"617{lineno}"
-            self.nvim.command(f"sign define {sign_id} linehl={hl_id}")
+            self.nvim.command(f"sign define {sign_id} linehl={self.hl_id}")
             self.marks[bnr][sign_id] = self.nvim.command(f'sign place {sign_id} line={lineno} name={sign_id}') or True
+    def mark_comment(self, comment):
+        bnr = self.nvim.current.buffer
+        if bnr not in self.extmarks:
+            self.extmarks[bnr] = {}
+        
+        self.mark_lines(comment.permalink.start, comment.permalink.end)
+        extmark_id = self.nvim.api.buf_set_extmark(bnr, self.ns_id, comment.permalink.start-1, 0, dict(
+            virt_lines=[
+                [['-'*self.nvim.current.window.width+'\n', self.hl_id]],
+                *[[[line, self.hl_id]] for line in comment.text.split('\n')],
+                [['-'*self.nvim.current.window.width+'\n', self.hl_id]],
+            ],
+            virt_lines_above=True,
+            line_hl_group=self.hl_id,
+       ))
+        self.extmarks[bnr][extmark_id] = True
+
     def unmark(self):
         for bnr in self.marks.keys():
             for lineno in self.marks[bnr].keys():
                 self.nvim.command(f"sign unplace {lineno}")
         self.marks = {}
+        for bnr in self.extmarks.keys():
+            for mark_id in self.extmarks[bnr].keys():
+                self.nvim.api.buf_del_extmark(bnr, self.ns_id, mark_id)
+        self.extmarks = {}
         
 
 @pynvim.plugin
@@ -152,6 +174,7 @@ class TestPlugin(object):
         self.nvim = nvim
         self.highlight_manager = HLManager(nvim)
         self.comment_buffer = None
+        self.comment_window = None
         self.comments = {}
 
     @pynvim.command("Permalink", nargs="*", range="", sync=False)
@@ -210,7 +233,6 @@ class TestPlugin(object):
             b64ref, _ = filename.split('.gossip.md',maxsplit=1)
             uri = base64.b64decode(b64ref).decode('utf-8')
             permalink = GitPermalink.from_permalink(uri)
-            self.nvim.command(f'echom "{permalink.path},{fpath},{permalink.commit}"')
             if permalink.path != fpath:
                 continue
             if permalink.commit not in commits:
@@ -218,36 +240,14 @@ class TestPlugin(object):
             comments.append(GossipComment(path))
         return comments
 
-    @pynvim.autocmd("CursorMoved")
-    def cursor_moved(self, *args, **kwargs):
-        if not self.comment_buffer:
-            return
-        row, _ = self.nvim.current.window.cursor
-        self.nvim.command(f'echom "cursormoved {row}"')
-        fullpath = self.nvim.funcs.expand('%:p')
-        if fullpath not in self.comments:
-            return
-        comments = self.comments[fullpath]
-        for comment in comments:
-            if comment.permalink.start <= row <= comment.permalink.end:
-                self.comment_buffer[:] = comment.text.split('\n')
-                self.nvim.command(f'echom "cursormoved {row}"')
-                break
-        else:
-            self.comment_buffer[:] = []
-
     @pynvim.command("CommentsOn", nargs="*", range="", sync=False)
     def show_comments(self, *args, **kwargs):
         fullpath = self.nvim.funcs.expand('%:p')
         comments = self.get_comments(fullpath)
         self.comments[fullpath] = comments
         for comment in comments:
-            self.highlight_manager.mark_lines(comment.permalink.start, comment.permalink.end)
-        self.nvim.command("split comment-preview | set buftype=nofile")
-        self.comment_buffer = self.nvim.current.buffer
-        self.nvim.command(f"wincmd p")
+            self.highlight_manager.mark_comment(comment)
 
     @pynvim.command("CommentsOff", nargs="*", range="", sync=False)
     def hide_comments(self, *args, **kwargs):
         self.highlight_manager.unmark()
-        self.comment_buffer = None

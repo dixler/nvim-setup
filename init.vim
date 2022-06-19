@@ -223,6 +223,10 @@ nnoremap <leader>gb :Git blame<cr>
 nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 nnoremap <leader>vs :source $MYVIMRC<cr>
 
+vnoremap <leader>cc :'<,'>Comment<cr>
+nnoremap <leader>cs :CommentsOn<cr>
+nnoremap <leader>ch :CommentsOff<cr>
+
 autocmd VimEnter * UpdateRemotePlugins
 
 ""autocmd! FileType list wincmd H
