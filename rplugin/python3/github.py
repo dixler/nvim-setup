@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
 import os
+import glob
 import base64
 import pynvim
+
+class GossipComment:
+    def __init__(self, path):
+        self.path = path
+        with open(path) as f:
+            self.text = f.read()
+
+        filename = os.path.basename(path)
+        b64ref, _ = filename.split('.gossip.md',maxsplit=1)
+        uri = base64.b64decode(b64ref).decode('utf-8')
+        self.permalink = GitPermalink.from_permalink(uri)
 
 class GitPermalink:
     @staticmethod
@@ -58,6 +70,9 @@ class GitRepo:
 
     def get_file_last_commit(self, path):
         return self._git(f"log -1 --format=format:%H {path}")
+
+    def get_file_commits(self, path):
+        return self._git(f"log --format=format:%H {path}").split('\n')
 
     def get_head_commit(self):
         return self._git(f"rev-parse HEAD")
@@ -136,6 +151,8 @@ class TestPlugin(object):
     def __init__(self, nvim):
         self.nvim = nvim
         self.highlight_manager = HLManager(nvim)
+        self.comment_buffer = None
+        self.comments = {}
 
     @pynvim.command("Permalink", nargs="*", range="", sync=False)
     def permalink(self, *args, **kwargs):
@@ -165,7 +182,6 @@ class TestPlugin(object):
         self.highlight_manager.mark_lines(start, end)
         # TODO open buffer to read(or create if not exists) comment
 
-
         repo = GitRepo.from_path(fullpath)
         root_path = os.path.join(repo.root, '.git', 'gossip')
 
@@ -183,16 +199,55 @@ class TestPlugin(object):
         self.highlight_manager.unmark()
 
     def get_comments(self, fullpath):
-        with os.popen('git log --format=format:%H init.vim'):
-            return []
+        # TODO probably break this out
+        repo = GitRepo.from_path(fullpath)
+        gossip_glob = os.path.join(repo.root, '.git', 'gossip', '*.gossip.md')
+        commits = set(repo.get_file_commits(fullpath))
+        fpath = repo.to_relative_path(fullpath)
+        comments = []
+        for path in glob.glob(gossip_glob):
+            filename = os.path.basename(path)
+            b64ref, _ = filename.split('.gossip.md',maxsplit=1)
+            uri = base64.b64decode(b64ref).decode('utf-8')
+            permalink = GitPermalink.from_permalink(uri)
+            self.nvim.command(f'echom "{permalink.path},{fpath},{permalink.commit}"')
+            if permalink.path != fpath:
+                continue
+            if permalink.commit not in commits:
+                continue
+            comments.append(GossipComment(path))
+        return comments
+
+    @pynvim.autocmd("CursorMoved")
+    def cursor_moved(self, *args, **kwargs):
+        if not self.comment_buffer:
+            return
+        row, _ = self.nvim.current.window.cursor
+        self.nvim.command(f'echom "cursormoved {row}"')
+        fullpath = self.nvim.funcs.expand('%:p')
+        if fullpath not in self.comments:
+            return
+        comments = self.comments[fullpath]
+        for comment in comments:
+            if comment.permalink.start <= row <= comment.permalink.end:
+                self.comment_buffer[:] = comment.text.split('\n')
+                self.nvim.command(f'echom "cursormoved {row}"')
+                break
+        else:
+            self.comment_buffer[:] = []
 
     @pynvim.command("CommentsOn", nargs="*", range="", sync=False)
     def show_comments(self, *args, **kwargs):
         fullpath = self.nvim.funcs.expand('%:p')
         comments = self.get_comments(fullpath)
+        self.comments[fullpath] = comments
         for comment in comments:
-            self.highlight_manager.mark_lines(comment.start, comment.end)
+            self.highlight_manager.mark_lines(comment.permalink.start, comment.permalink.end)
+        self.nvim.command("split comment-preview | set buftype=nofile")
+        self.comment_buffer = self.nvim.current.buffer
+        self.nvim.command(f"wincmd p")
 
     @pynvim.command("CommentsOff", nargs="*", range="", sync=False)
     def hide_comments(self, *args, **kwargs):
         self.highlight_manager.unmark()
+        self.comment_buffer = None
