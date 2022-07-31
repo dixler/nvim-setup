@@ -20,6 +20,7 @@ require('packer').startup(function(use)
   use { 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true }}
   use 'junegunn/fzf.vim'
   use { 'neoclide/coc.nvim', branch='release'}
+  use 'joshdick/onedark.vim'
   --use({
   --  'ray-x/navigator.lua',
   --  requires = {

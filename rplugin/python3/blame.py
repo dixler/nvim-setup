@@ -88,7 +88,13 @@ class TestPlugin(object):
 
         for blame in self.blame_lines[bnr.name]:
             hl_id = f"DiffGutter_{blame.commit}"
-            self.nvim.command(f"highlight {hl_id} guibg=#{blame.commit[:6]}")
+
+            background = blame.commit[:6]
+            red, green, blue = [int(background[i:i+2], base=16) for i in range(0, len(background), 2)]
+            is_light = ( red + green + blue ) / 3 > 0.5
+            text_color = 'black' if is_light else 'white'
+            self.nvim.command(f"highlight {hl_id} guibg=#{background} guifg={text_color}")
+
             sign_id = f"DiffGutterSign_{blame.commit}"
             sign_text = blame.email.split('@')[0][:2]
             self.nvim.command(f"sign define {sign_id} texthl={hl_id} numhl={hl_id} text={sign_text}")

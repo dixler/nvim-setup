@@ -32,6 +32,11 @@ set relativenumber
 set termguicolors
 set signcolumn=yes:1
 syntax enable
+let g:onedark_color_overrides = {
+\ "background": {"gui": "black", "cterm": "black", "cterm16": "black" },
+\}
+
+colorscheme onedark
 
 
 " Set internal encoding of vim, not needed on neovim, since coc.nvim using some
