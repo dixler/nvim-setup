@@ -4,7 +4,7 @@ let &scrolloff=999-&scrolloff
 " Mode Background color changer-------------------------------
 function! InsertStatuslineColor(mode)
     if a:mode == 'i'
-        hi Normal ctermbg=236 guibg=#282c34
+        hi Normal ctermbg=236 guibg=#41444A
     elseif a:mode == 'r'
         hi Normal ctermbg=52 guibg=#e06c75
     else
@@ -23,7 +23,7 @@ highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE gui
 
 au InsertEnter * call InsertStatuslineColor(v:insertmode)
 au InsertChange * call InsertStatuslineColor(v:insertmode)
-au InsertLeave * hi Normal ctermbg=232 guibg=black
+au InsertLeave * hi Normal ctermbg=232 guibg=#282c34
 
 set number
 set relativenumber
@@ -33,7 +33,7 @@ set signcolumn=yes:1
 syntax enable
 
 let g:onedark_color_overrides = {
-\ "background": {"gui": "black", "cterm": "black", "cterm16": "black" },
+\ "background": {"gui": "#282c34", "cterm": "black", "cterm16": "black" },
 \}
 
 colorscheme onedark
