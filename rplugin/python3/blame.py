@@ -91,7 +91,7 @@ class TestPlugin(object):
 
             background = blame.commit[:6]
             red, green, blue = [int(background[i:i+2], base=16) for i in range(0, len(background), 2)]
-            is_light = ( red + green + blue ) / 3 > 0.5
+            is_light = ( red + green + blue ) / 3 > 128
             text_color = 'black' if is_light else 'white'
             self.nvim.command(f"highlight {hl_id} guibg=#{background} guifg={text_color}")
 

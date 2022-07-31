@@ -1,37 +1,37 @@
 " center everything
 let &scrolloff=999-&scrolloff
 
-" THEMING
-    " MODALITY
-        " Mode Background color changer-------------------------------
-        function! InsertStatuslineColor(mode)
-          if a:mode == 'i'
-            hi Normal ctermbg=236 guibg=#000000
-          elseif a:mode == 'r'
-            hi Normal ctermbg=52 guibg=#000000
-          else
-            hi Normal ctermbg=3 guibg=#000000
-          endif
-        endfunction
-        " set default color
-        hi Normal ctermbg=232 guibg=#000000
-    " CURSOR
-        set cursorcolumn
-        set cursorline
-        highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
-        ""hi CursorColumn cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
-        ""hi CursorLine   cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
-        " hi Cursor       cterm=NONE     ctermbg=232     ctermbg=0    guibg=NONE     guifg=NONE
+" Mode Background color changer-------------------------------
+function! InsertStatuslineColor(mode)
+    if a:mode == 'i'
+        hi Normal ctermbg=236 guibg=#282c34
+    elseif a:mode == 'r'
+        hi Normal ctermbg=52 guibg=#e06c75
+    else
+        hi Normal ctermbg=3 guibg=#282c34
+    endif
+endfunction
+" set default color
+hi Normal ctermbg=232 guibg=#000000
+" CURSOR
+set cursorcolumn
+set cursorline
+highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=NONE gui=NONE guifg=DarkGrey guibg=NONE
+""hi CursorColumn cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
+""hi CursorLine   cterm=NONE     ctermbg=235    ctermfg=NONE   guibg=darkred  guifg=black
+" hi Cursor       cterm=NONE     ctermbg=232     ctermbg=0    guibg=NONE     guifg=NONE
 
 au InsertEnter * call InsertStatuslineColor(v:insertmode)
 au InsertChange * call InsertStatuslineColor(v:insertmode)
-au InsertLeave * hi Normal ctermbg=232 guibg=#000000
+au InsertLeave * hi Normal ctermbg=232 guibg=black
 
 set number
 set relativenumber
 set termguicolors
 set signcolumn=yes:1
+
 syntax enable
+
 let g:onedark_color_overrides = {
 \ "background": {"gui": "black", "cterm": "black", "cterm16": "black" },
 \}
@@ -232,3 +232,15 @@ autocmd VimEnter * UpdateRemotePlugins
 
 ""autocmd! FileType list wincmd H
 ""autocmd! FileType help wincmd H
+
+set updatetime=10
+
+function! HighlightWordUnderCursor()
+    if getline(".")[col(".")-1] !~# '[[:punct:][:blank:]]' 
+        exec 'match' 'Search' '/\V\<'.expand('<cword>').'\>/' 
+    else 
+        match none 
+    endif
+endfunction
+
+autocmd! CursorHold,CursorHoldI * call HighlightWordUnderCursor()
