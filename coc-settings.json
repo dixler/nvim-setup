@@ -1,4 +1,12 @@
 {
+    "coc": {
+        "source": {
+            "around": {
+                "enable": false
+            }
+
+        }
+    },
 	"languageserver": {
 		"golang": {
 			"command": "/home/kdixler/go/bin/gopls",

@@ -16,7 +16,6 @@ require('packer').startup(function(use)
   use { 'junegunn/fzf', run = function() vim.fn['fzf#install']() end }
   use { 'nvim-treesitter/nvim-treesitter', run = function() vim.fn['TSUpdate']() end }
   use 'nvim-treesitter/playground'
-  use 'p00f/nvim-ts-rainbow'
   use { 'romgrk/barbar.nvim', requires = {'kyazdani42/nvim-web-devicons'} }
   use { 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true }}
   use 'junegunn/fzf.vim'

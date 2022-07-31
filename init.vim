@@ -217,15 +217,11 @@ set expandtab
 " Keybindings
 let mapleader = " "
 nnoremap <leader>t :NERDTreeToggle<CR>
-nnoremap <leader>s :FZF<cr>
-nnoremap <leader>/ :Rg<cr>
+nnoremap <leader>s :FZF!<cr>
+nnoremap <leader>/ :Rg!<cr>
 nnoremap <leader>gb :Git blame<cr>
 nnoremap <leader>ve :vsplit $MYVIMRC<cr>
 nnoremap <leader>vs :source $MYVIMRC<cr>
-
-vnoremap <leader>cc :'<,'>Comment<cr>
-nnoremap <leader>cs :CommentsOn<cr>
-nnoremap <leader>ch :CommentsOff<cr>
 
 autocmd VimEnter * UpdateRemotePlugins
 
